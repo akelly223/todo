@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistiques - Eisenhower TODO{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    <i class="fas fa-chart-bar text-purple-600 mr-2"></i>Statistiques de productivité
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Analysez vos performances et optimisez votre gestion du temps
+                </p>
+            </div>
+            <a href="{% url 'tasks:dashboard' %}"
+                class="px-6 py-3 gradient-purple text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                <i class="fas fa-arrow-left mr-2"></i>Retour au dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques globales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-purple-500 to-purple-700 p-6 rounded-xl shadow-xl text-white">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-tasks text-4xl opacity-80"></i>
+                <div class="text-right">
+                    <p class="text-sm opacity-90">Total créées</p>
+                    <p class="text-4xl font-bold">{{ stats.total_tasks_created }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-500 to-green-700 p-6 rounded-xl shadow-xl text-white">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-check-circle text-4xl opacity-80"></i>
+                <div class="text-right">
+                    <p class="text-sm opacity-90">Total complétées</p>
+                    <p class="text-4xl font-bold">{{ stats.total_tasks_completed }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 p-6 rounded-xl shadow-xl text-white">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-percentage text-4xl opacity-80"></i>
+                <div class="text-right">
+                    <p class="text-sm opacity-90">Taux de complétion</p>
+                    <p class="text-4xl font-bold">{{ stats.completion_rate }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-orange-500 to-orange-700 p-6 rounded-xl shadow-xl text-white">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fas fa-fire text-4xl opacity-80"></i>
+                <div class="text-right">
+                    <p class="text-sm opacity-90">En cours</p>
+                    <p class="text-4xl font-bold">{{ stats.total_tasks_created|add:"-"|add:stats.total_tasks_completed
+                        }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommandations intelligentes -->
+    {% if insights.recommendations %}
+    <div
+        class="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-8 rounded-xl border-2 border-purple-200 dark:border-purple-700">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-brain mr-2 text-purple-600"></i>Recommandations intelligentes
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for rec in insights.recommendations %}
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+                <div class="flex items-start space-x-3">
+                    <span class="text-3xl">
+                        {% if rec.type == 'success' %}✅{% elif rec.type == 'warning' %}⚠️{% else %}💡{% endif %}
+                    </span>
+                    <p class="text-gray-700 dark:text-gray-300 flex-1">{{ rec.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Statistiques par quadrant -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <i class="fas fa-th-large mr-2 text-purple-600"></i>Répartition par quadrant
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Q1 -->
+            <div
+                class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 p-6 rounded-xl shadow-lg border-2 border-red-300 dark:border-red-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-red-800 dark:text-red-300">
+                        <i class="fas fa-fire mr-2"></i>Q1 - Urgent & Important
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-red-600">{{ quadrant_stats.Q1.total }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600">{{ quadrant_stats.Q1.completed }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Complétées</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-orange-600">{{ quadrant_stats.Q1.active }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Actives</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-white dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    {% if quadrant_stats.Q1.total > 0 %}
+                    <div class="bg-green-500 h-full transition-all duration-500"
+                        style="width: {{ quadrant_stats.Q1.completed|floatformat:0|add:'0'|divisibleby:quadrant_stats.Q1.total|yesno:'100,0' }}%">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div
+                class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 p-6 rounded-xl shadow-lg border-2 border-orange-300 dark:border-orange-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-orange-800 dark:text-orange-300">
+                        <i class="fas fa-calendar-alt mr-2"></i>Q2 - Important
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-orange-600">{{ quadrant_stats.Q2.total }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600">{{ quadrant_stats.Q2.completed }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Complétées</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-orange-600">{{ quadrant_stats.Q2.active }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Actives</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-white dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    {% if quadrant_stats.Q2.total > 0 %}
+                    <div class="bg-green-500 h-full transition-all duration-500"
+                        style="width: {% widthratio quadrant_stats.Q2.completed quadrant_stats.Q2.total 100 %}%">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div
+                class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-6 rounded-xl shadow-lg border-2 border-blue-300 dark:border-blue-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-blue-800 dark:text-blue-300">
+                        <i class="fas fa-user-friends mr-2"></i>Q3 - Urgent
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-blue-600">{{ quadrant_stats.Q3.total }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600">{{ quadrant_stats.Q3.completed }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Complétées</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-blue-600">{{ quadrant_stats.Q3.active }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Actives</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-white dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    {% if quadrant_stats.Q3.total > 0 %}
+                    <div class="bg-green-500 h-full transition-all duration-500"
+                        style="width: {% widthratio quadrant_stats.Q3.completed quadrant_stats.Q3.total 100 %}%">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div
+                class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/30 p-6 rounded-xl shadow-lg border-2 border-gray-300 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-300">
+                        <i class="fas fa-trash-alt mr-2"></i>Q4 - Basse priorité
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-gray-600">{{ quadrant_stats.Q4.total }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-green-600">{{ quadrant_stats.Q4.completed }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Complétées</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-2xl font-bold text-gray-600">{{ quadrant_stats.Q4.active }}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Actives</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-white dark:bg-gray-800 rounded-full h-4 overflow-hidden">
+                    {% if quadrant_stats.Q4.total > 0 %}
+                    <div class="bg-green-500 h-full transition-all duration-500"
+                        style="width: {% widthratio quadrant_stats.Q4.completed quadrant_stats.Q4.total 100 %}%">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conseils de productivité -->
+    <div
+        class="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 p-8 rounded-xl border-2 border-green-200 dark:border-green-700">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            <i class="fas fa-lightbulb mr-2 text-green-600"></i>Conseils pour optimiser votre productivité
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🎯 Concentrez-vous sur Q2</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Les tâches importantes mais pas urgentes sont la clé du succès à long terme. Planifiez du temps pour
+                    elles !
+                </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🚨 Minimisez Q1</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Trop de tâches urgentes et importantes signifie que vous êtes en mode réactif. Anticipez davantage !
+                </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">👥 Déléguez Q3</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Les tâches urgentes mais pas importantes peuvent souvent être déléguées ou automatisées.
+                </p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">🗑️ Éliminez Q4</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Soyez honnête : ces tâches sont-elles vraiment nécessaires ? Éliminez-les pour vous concentrer sur
+                    l'essentiel.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
